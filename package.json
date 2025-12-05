@@ -1,12 +1,11 @@
 {
     "name": "vidreduce",
     "version": "1.0.0",
-    "description": "YouTube video summarizer with web interface and CLI tools using OpenAI GPT or Google Gemini",
-    "main": "youtubeSummarize.js",
+    "description": "YouTube video summarizer with web interface using OpenAI GPT or Google Gemini",
+    "main": "webServer.js",
     "scripts": {
-        "start": "node youtubeSummarize.js",
-        "web": "node webServer.js",
-        "fetch": "node youtubeSummarize.js"
+        "start": "node webServer.js",
+        "web": "node webServer.js"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",

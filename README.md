@@ -1,17 +1,16 @@
 # VidReduce
 
-A powerful YouTube video summarizer with both web interface and command-line tools. Extract key insights from any YouTube video using OpenAI GPT or Google Gemini AI models. Perfect for quickly understanding educational content, tutorials, podcasts, and videos.
+A powerful YouTube video summarizer with a beautiful web interface. Extract key insights from any YouTube video using OpenAI GPT or Google Gemini AI models. Perfect for quickly understanding educational content, tutorials, podcasts, and videos.
 
 ## ✨ Features
 
 - 🌐 **Beautiful Web Interface** - Modern, responsive web UI with real-time processing
-- 💻 **Command Line Tool** - Powerful CLI for automation and scripting
 - 🎥 **YouTube Transcript Fetching** - Automatically retrieves closed captions from videos
 - 🤖 **AI-Powered Summaries** - Uses OpenAI GPT-4o-mini or Google Gemini Pro for intelligent summarization
 - 🎨 **Professional HTML Output** - Generates beautiful, formatted summary reports
 - 📱 **Mobile-Friendly** - Responsive design works on all devices
 - 🔒 **Secure API Handling** - API keys entered securely (never stored)
-- � **Deployment Flexible** - Works locally or deploy anywhere (Vercel, Railway, Heroku, etc.)
+- 🚀 **Deployment Flexible** - Works locally or deploy anywhere (Vercel, Railway, Heroku, etc.)
 - ⚡ **Fast Processing** - Optimized for quick results
 
 ## Prerequisites
@@ -96,69 +95,6 @@ Then open your browser and visit `http://localhost:3000`
 - 📄 Automatic HTML summary generation
 - 🔗 Direct YouTube video links
 
-### Command Line
-For advanced users or automation:
-
-```bash
-node youtubeSummarize.js VIDEO_ID
-```
-
-Replace `VIDEO_ID` with the YouTube video ID (the part after `v=` in the URL).
-
-### Example
-
-For a video with URL: `https://www.youtube.com/watch?v=3hptKYix4X8`
-
-```bash
-node youtubeSummarize.js 3hptKYix4X8
-```
-
-### What Happens
-
-1. **Validates** the video ID exists using YouTube Data API
-2. **Fetches** the video title and metadata
-3. **Retrieves** the full transcript using youtubei.js
-4. **Saves** the transcript to `transcript_VIDEO_ID.txt`
-5. **Sends** the transcript to OpenAI for summarization
-6. **Generates** a summary with main takeaways
-7. **Saves** the summary to `summary_VIDEO_ID.txt`
-8. **Displays** the summary in the console
-
-## Output Files
-
-The tool generates two files per video:
-
-- **`transcript_VIDEO_ID.txt`** - Full transcript of the video
-- **`summary_VIDEO_ID.html`** - AI-generated summary in a beautifully formatted HTML page (automatically opens in browser)
-
-Both files are automatically ignored by git (see `.gitignore`).
-
-## Example Output
-
-```
-Video found: How to Build a REST API with Node.js
-Attempting to fetch transcript for video ID: 3hptKYix4X8
-✓ Transcript fetched with 243 segments
-
-Transcript saved to transcript_3hptKYix4X8.txt
-Transcript length: 15847 characters.
-
-Sending transcript to OpenAI for summarization...
-✓ Summary generated successfully
-
-Summary saved to summary_3hptKYix4X8.html
-✓ Summary opened in browser: summary_3hptKYix4X8.html
-
---- SUMMARY PREVIEW ---
-**Main Takeaways:**
-
-1. **Understanding REST APIs**: REST APIs are essential for...
-2. **Setting up Express**: The tutorial covers how to set up...
-3. **Database Integration**: Learn how to connect MongoDB...
-...
---- END SUMMARY ---
-```
-
 ## 🌐 Deployment
 
 The app is **deployment-agnostic** - deploy anywhere that supports Node.js!
@@ -166,7 +102,6 @@ The app is **deployment-agnostic** - deploy anywhere that supports Node.js!
 ### Local Development
 ```bash
 npm run web  # Web interface on http://localhost:3000
-npm run fetch VIDEO_ID  # CLI usage
 ```
 
 ### Cloud Deployment Options
@@ -207,7 +142,6 @@ git push heroku main
 
 ```
 YTSummarize/
-├── youtubeSummarize.js       # Main CLI application script
 ├── webServer.js              # Express.js web server
 ├── public/
 │   └── index.html            # Web interface HTML
@@ -283,7 +217,7 @@ Saves both raw transcript and formatted summary to disk and displays the summary
 
 ## Configuration
 
-You can customize the summarization by editing `youtubeSummarize.js`:
+You can customize the summarization by editing `webServer.js`:
 
 ### Change AI Model
 ```javascript
