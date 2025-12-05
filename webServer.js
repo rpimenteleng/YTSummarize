@@ -5,6 +5,7 @@ const axios = require('axios');
 // const { Innertube } = require('youtubei.js'); // Remove this - will use dynamic import
 const OpenAI = require('openai');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+// const { paymentMiddleware } = require('x402-express'); // Removed - using direct donations
 const { exec } = require('child_process');
 const path = require('path');
 const cors = require('cors');
@@ -376,6 +377,30 @@ app.get('/api/config', (req, res) => {
     hasYouTubeKey,
     hasOpenAIKey,
     hasGeminiKey
+  });
+});
+
+// Remove x402 middleware - using direct crypto donations instead
+// app.use(paymentMiddleware(...));
+
+// Simple donation endpoint that shows wallet info
+app.get('/donate', (req, res) => {
+  res.json({
+    message: 'Thank you for considering a donation!',
+    wallet: process.env.DONATION_BASE_WALLET,
+    network: 'Base',
+    preferredToken: 'USDC',
+    amount: 'Any amount appreciated',
+    instructions: 'Send USDC to the wallet address on Base network'
+  });
+});
+
+app.post('/donate', (req, res) => {
+  res.json({
+    message: 'Thank you for your donation!',
+    wallet: process.env.DONATION_BASE_WALLET,
+    network: 'Base',
+    preferredToken: 'USDC'
   });
 });
 
