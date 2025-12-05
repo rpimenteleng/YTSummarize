@@ -275,6 +275,86 @@
                 padding: 15px;
             }
         }
+
+        .ai-provider-section {
+            margin-bottom: 2rem;
+        }
+
+        .ai-provider-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #374151;
+            font-size: 1.1rem;
+        }
+
+        .ai-provider-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .ai-option {
+            position: relative;
+        }
+
+        .ai-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .ai-card {
+            display: block;
+            padding: 1.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .ai-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .ai-option input[type="radio"]:checked + .ai-card {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .ai-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ai-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .ai-model {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.25rem;
+        }
+
+        .ai-desc {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .ai-option input[type="radio"]:checked + .ai-card .ai-desc {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -288,6 +368,30 @@
         </div>
 
         <form id="summarizeForm">
+            <div class="ai-provider-section">
+                <label>🤖 Choose AI Provider</label>
+                <div class="ai-provider-options">
+                    <div class="ai-option" data-provider="openai">
+                        <input type="radio" id="openai" name="aiProvider" value="openai" checked>
+                        <label for="openai" class="ai-card">
+                            <div class="ai-icon">🚀</div>
+                            <div class="ai-name">OpenAI</div>
+                            <div class="ai-model">GPT-4o-mini</div>
+                            <div class="ai-desc">Fast & reliable</div>
+                        </label>
+                    </div>
+                    <div class="ai-option" data-provider="gemini">
+                        <input type="radio" id="gemini" name="aiProvider" value="gemini">
+                        <label for="gemini" class="ai-card">
+                            <div class="ai-icon">✨</div>
+                            <div class="ai-name">Google</div>
+                            <div class="ai-model">Gemini 2.5 Pro</div>
+                            <div class="ai-desc">Advanced AI</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <div class="api-keys-section">
                 <h3>🔑 API Configuration</h3>
                 <div class="form-group">
@@ -300,7 +404,7 @@
                         required
                     >
                 </div>
-                <div class="form-group">
+                <div class="form-group" id="openaiKeyGroup">
                     <label for="openaiKey">OpenAI API Key</label>
                     <input
                         type="password"
@@ -308,6 +412,15 @@
                         name="openaiKey"
                         placeholder="Enter your OpenAI API key"
                         required
+                    >
+                </div>
+                <div class="form-group" id="geminiKeyGroup" style="display: none;">
+                    <label for="geminiKey">Google Gemini API Key</label>
+                    <input
+                        type="password"
+                        id="geminiKey"
+                        name="geminiKey"
+                        placeholder="Enter your Google Gemini API key"
                     >
                 </div>
             </div>
@@ -369,6 +482,29 @@
             document.getElementById('downloadTranscript').href = transcriptUrl;
             document.getElementById('downloadTranscript').download = `transcript_${resultData.videoTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
         }
+
+        // AI Provider toggle functionality
+        document.querySelectorAll('input[name="aiProvider"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const provider = e.target.value;
+                const openaiGroup = document.getElementById('openaiKeyGroup');
+                const geminiGroup = document.getElementById('geminiKeyGroup');
+                const openaiInput = document.getElementById('openaiKey');
+                const geminiInput = document.getElementById('geminiKey');
+
+                if (provider === 'openai') {
+                    openaiGroup.style.display = 'block';
+                    geminiGroup.style.display = 'none';
+                    openaiInput.required = true;
+                    geminiInput.required = false;
+                } else if (provider === 'gemini') {
+                    openaiGroup.style.display = 'none';
+                    geminiGroup.style.display = 'block';
+                    openaiInput.required = false;
+                    geminiInput.required = true;
+                }
+            });
+        });
 
         document.getElementById('summarizeForm').addEventListener('submit', async (e) => {
             e.preventDefault();

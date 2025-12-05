@@ -4,6 +4,7 @@ const fs = require('fs');
 const axios = require('axios');
 // const { Innertube } = require('youtubei.js'); // Remove this - will use dynamic import
 const OpenAI = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { exec } = require('child_process');
 const path = require('path');
 const cors = require('cors');
@@ -70,31 +71,143 @@ async function fetchTranscript(videoId) {
 }/**
  * Summarize the transcript using OpenAI
  */
-async function summarizeTranscript(transcript, videoTitle) {
-  console.log('\nSending transcript to OpenAI for summarization...');
+async function summarizeTranscript(transcript, videoTitle, aiProvider = 'openai', apiKey) {
+  console.log(`\nSending transcript to ${aiProvider.toUpperCase()} for summarization...`);
+
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "You are a helpful assistant that summarizes YouTube video transcripts. Provide clear, concise summaries with the main takeaways."
-        },
-        {
-          role: "user",
-          content: `Please summarize the following YouTube video transcript and provide the main takeaways.\n\nVideo Title: ${videoTitle}\n\nTranscript:\n${transcript}`
+    if (aiProvider === 'openai') {
+      return await summarizeWithOpenAI(transcript, videoTitle, apiKey);
+    } else if (aiProvider === 'gemini') {
+      return await summarizeWithGemini(transcript, videoTitle, apiKey);
+    } else {
+      throw new Error(`Unsupported AI provider: ${aiProvider}`);
+    }
+  } catch (error) {
+    console.error(`Failed to generate summary with ${aiProvider}:`, error.message);
+    throw error;
+  }
+}
+
+async function summarizeWithOpenAI(transcript, videoTitle, apiKey) {
+  const openai = new OpenAI({ apiKey });
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content: "You are a helpful assistant that summarizes YouTube video transcripts. Provide ONLY the main takeaways in bullet point format."
+      },
+      {
+        role: "user",
+        content: `Please summarize the following YouTube video transcript and provide ONLY the main takeaways in bullet point format.
+
+Video Title: ${videoTitle}
+
+Transcript:
+${transcript}
+
+IMPORTANT: Your response should ONLY contain bullet points with the key takeaways. Do not include any introductory text, conclusions, or explanations. Start directly with the bullet points.`
+      }
+    ],
+    temperature: 0.7,
+    max_tokens: 1000
+  });
+
+  return response.choices[0].message.content;
+}
+
+async function summarizeWithGemini(transcript, videoTitle, apiKey) {
+  try {
+    // First, check if the API key is valid by testing a simple request
+    console.log('Validating Gemini API key...');
+    const testResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (!testResponse.ok) {
+      const errorData = await testResponse.json();
+      throw new Error(`Invalid Gemini API key: ${errorData.error?.message || 'Unknown error'}`);
+    }
+
+    const modelsData = await testResponse.json();
+    console.log('Available Gemini models:', modelsData.models?.map(m => m.name).join(', ') || 'No models found');
+
+    // Find a working text generation model (not embedding models)
+    const availableModels = modelsData.models?.map(m => m.name.replace('models/', '')) || [];
+    console.log('Parsed available models:', availableModels.slice(0, 10).join(', ') + '...'); // Show first 10
+
+    const textGenerationModels = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash-001', 'gemini-2.0-flash', 'gemini-pro-latest', 'gemini-flash-latest', 'gemini-2.0-pro-exp'];
+    console.log('Looking for preferred models:', textGenerationModels);
+
+    const modelToUse = textGenerationModels.find(m => availableModels.includes(m)) ||
+                      availableModels.find(m => m.includes('gemini') && !m.includes('embedding')) ||
+                      availableModels[0];
+
+    console.log('Selected model:', modelToUse);
+
+    if (!modelToUse) {
+      throw new Error('No suitable Gemini models found');
+    }
+
+    console.log(`Using Gemini model: ${modelToUse}`);
+
+    const prompt = `Please summarize the following YouTube video transcript and provide ONLY the main takeaways in bullet point format.
+
+Video Title: ${videoTitle}
+
+Transcript:
+${transcript}
+
+IMPORTANT: Your response should ONLY contain bullet points with the key takeaways. Do not include any introductory text, conclusions, or explanations. Start directly with the bullet points.`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelToUse}:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 4000, // Increased for longer summaries
         }
-      ],
-      temperature: 0.7,
-      max_tokens: 1000
+      })
     });
 
-    const summary = response.choices[0].message.content;
-    console.log('✓ Summary generated successfully');
-    return summary;
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.log('Gemini API error response:', errorData);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${JSON.stringify(errorData)}`);
+    }
+
+    const data = await response.json();
+    console.log('Gemini API success response structure:', JSON.stringify(data, null, 2));
+
+    // Handle different response formats
+    if (data.candidates && data.candidates[0]) {
+      const candidate = data.candidates[0];
+
+      // Check if response was truncated
+      if (candidate.finishReason === 'MAX_TOKENS') {
+        throw new Error('Response was truncated due to token limit. Try a shorter transcript or increase token limit.');
+      }
+
+      // Check if content has parts
+      if (candidate.content && candidate.content.parts && candidate.content.parts[0]) {
+        return candidate.content.parts[0].text;
+      } else {
+        console.error('Response missing content parts:', candidate);
+        throw new Error('Gemini API returned incomplete response');
+      }
+    } else {
+      console.error('Unexpected response structure:', data);
+      throw new Error('Unexpected Gemini API response format');
+    }
   } catch (error) {
-    console.error(`Failed to generate summary: ${error.message}`);
-    return null;
+    console.error('Gemini API error:', error);
+    throw error;
   }
 }
 
@@ -253,11 +366,29 @@ app.get('/', (req, res) => {
 });
 
 app.post('/summarize', async (req, res) => {
-  const { youtubeKey, openaiKey, videoId } = req.body;
+  const { youtubeKey, aiProvider, openaiKey, geminiKey, videoId } = req.body;
 
-  if (!youtubeKey || !openaiKey || !videoId) {
+  if (!youtubeKey || !videoId) {
     return res.status(400).json({
-      error: 'Missing required fields: YouTube API key, OpenAI API key, and video ID are required.'
+      error: 'Missing required fields: YouTube API key and video ID are required.'
+    });
+  }
+
+  if (aiProvider === 'openai' && !openaiKey) {
+    return res.status(400).json({
+      error: 'OpenAI API key is required when using OpenAI.'
+    });
+  }
+
+  if (aiProvider === 'gemini' && !geminiKey) {
+    return res.status(400).json({
+      error: 'Google Gemini API key is required when using Gemini.'
+    });
+  }
+
+  if (!aiProvider || !['openai', 'gemini'].includes(aiProvider)) {
+    return res.status(400).json({
+      error: 'Invalid AI provider. Must be "openai" or "gemini".'
     });
   }
 
@@ -287,10 +418,11 @@ app.post('/summarize', async (req, res) => {
     console.log(`Transcript fetched successfully (${transcript.length} characters)`);
 
     // Generate summary
-    const summary = await summarizeTranscript(transcript, videoTitle);
+    const apiKey = aiProvider === 'openai' ? openaiKey : geminiKey;
+    const summary = await summarizeTranscript(transcript, videoTitle, aiProvider, apiKey);
     if (!summary) {
       return res.status(500).json({
-        error: 'Failed to generate summary. Please check your OpenAI API key and try again.'
+        error: `Failed to generate summary with ${aiProvider.toUpperCase()}. Please check your API key and try again.`
       });
     }
 

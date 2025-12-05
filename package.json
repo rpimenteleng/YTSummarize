@@ -1,7 +1,7 @@
 {
     "name": "yt-summarize",
     "version": "1.0.0",
-    "description": "YouTube video summarizer with web interface and CLI tools using OpenAI GPT",
+    "description": "YouTube video summarizer with web interface and CLI tools using OpenAI GPT or Google Gemini",
     "main": "youtubeSummarize.js",
     "scripts": {
         "start": "node youtubeSummarize.js",
@@ -9,6 +9,7 @@
         "fetch": "node youtubeSummarize.js"
     },
     "dependencies": {
+        "@google/generative-ai": "^0.24.1",
         "axios": "^1.7.9",
         "cors": "^2.8.5",
         "dotenv": "^16.4.5",

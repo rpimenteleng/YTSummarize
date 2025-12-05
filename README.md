@@ -1,13 +1,13 @@
 # YT Summarize
 
-A powerful YouTube video summarizer with both web interface and command-line tools. Extract key insights from any YouTube video using OpenAI's GPT models. Perfect for quickly understanding educational content, tutorials, podcasts, and videos.
+A powerful YouTube video summarizer with both web interface and command-line tools. Extract key insights from any YouTube video using OpenAI GPT or Google Gemini AI models. Perfect for quickly understanding educational content, tutorials, podcasts, and videos.
 
 ## ✨ Features
 
 - 🌐 **Beautiful Web Interface** - Modern, responsive web UI with real-time processing
 - 💻 **Command Line Tool** - Powerful CLI for automation and scripting
 - 🎥 **YouTube Transcript Fetching** - Automatically retrieves closed captions from videos
-- 🤖 **AI-Powered Summaries** - Uses OpenAI GPT-4o-mini for intelligent summarization
+- 🤖 **AI-Powered Summaries** - Uses OpenAI GPT-4o-mini or Google Gemini Pro for intelligent summarization
 - 🎨 **Professional HTML Output** - Generates beautiful, formatted summary reports
 - 📱 **Mobile-Friendly** - Responsive design works on all devices
 - 🔒 **Secure API Handling** - API keys entered securely (never stored)
@@ -20,7 +20,7 @@ Before you begin, ensure you have:
 
 - **Node.js** (v14 or higher) - [Download here](https://nodejs.org/)
 - **YouTube Data API Key** - [Get one here](https://console.developers.google.com/)
-- **OpenAI API Key** - [Get one here](https://platform.openai.com/api-keys)
+- **AI API Key** - Either [OpenAI API Key](https://platform.openai.com/api-keys) or [Google Gemini API Key](https://makersuite.google.com/app/apikey)
 
 ## Installation
 
@@ -41,6 +41,8 @@ Before you begin, ensure you have:
    ```bash
    YOUTUBE_API_KEY=your_youtube_api_key_here
    OPENAI_API_KEY=your_openai_api_key_here
+   # OR for Google Gemini:
+   GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
    **Important:** Never commit your `.env` file to version control. It's already included in `.gitignore`.
@@ -65,6 +67,15 @@ Before you begin, ensure you have:
 
 **Note:** OpenAI API usage is pay-per-use. This tool uses the `gpt-4o-mini` model which is cost-effective (~$0.15 per million input tokens).
 
+### Google Gemini API Key
+
+1. Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Sign in with your Google account
+3. Create a new API key
+4. Copy the API key to your `.env` file
+
+**Note:** Google Gemini API has a generous free tier and uses the `gemini-2.5-pro` model for high-quality summarization.
+
 ## Usage
 
 ### Web Interface (Recommended)
@@ -78,6 +89,7 @@ Then open your browser and visit `http://localhost:3000`
 
 **Features:**
 - 🎨 Beautiful, modern web interface
+- 🤖 Choose between OpenAI GPT-4o-mini or Google Gemini 2.5 Pro
 - 🔐 Secure API key input (not stored)
 - 📱 Mobile-friendly responsive design
 - ⚡ Real-time processing with loading indicators
