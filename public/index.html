@@ -371,6 +371,91 @@
         .ai-option input[type="radio"]:checked + .ai-card .ai-desc {
             opacity: 1;
         }
+
+        /* Social Sharing Styles */
+        .social-share {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .social-share-title {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .social-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            min-width: 100px;
+            justify-content: center;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .social-btn.twitter {
+            background: #1da1f2;
+            color: white;
+        }
+
+        .social-btn.twitter:hover {
+            background: #1a91da;
+        }
+
+        .social-btn.whatsapp {
+            background: #25d366;
+            color: white;
+        }
+
+        .social-btn.whatsapp:hover {
+            background: #128c7e;
+        }
+
+        .social-btn.reddit {
+            background: #ff4500;
+            color: white;
+        }
+
+        .social-btn.reddit:hover {
+            background: #e03d00;
+        }
+
+        .social-btn.copy {
+            background: #6c757d;
+            color: white;
+        }
+
+        .social-btn.copy:hover {
+            background: #5a6268;
+        }
+
+        .social-btn.success {
+            background: #28a745 !important;
+        }
+
+        .social-btn.success:hover {
+            background: #218838 !important;
+        }
     </style>
 </head>
 <body>
@@ -380,6 +465,24 @@
             <div class="subtitle">AI-Powered YouTube Video Summarizer</div>
             <div class="description">
                 Extract key insights from any YouTube video using advanced AI. Get comprehensive summaries in seconds!
+            </div>
+            
+            <div class="social-share">
+                <div class="social-share-title">Share VidReduce with friends</div>
+                <div class="social-buttons">
+                    <button class="social-btn copy" onclick="copySiteLink()">
+                        📋 Copy Link
+                    </button>
+                    <a class="social-btn twitter" href="https://twitter.com/intent/tweet?text=Check out VidReduce - AI-powered YouTube video summarizer! Get instant summaries of any YouTube video.&url=https://vidreduce.vercel.app/" target="_blank">
+                        🐦 Twitter
+                    </a>
+                    <a class="social-btn whatsapp" href="https://wa.me/?text=Check out VidReduce - AI-powered YouTube video summarizer! Get instant summaries of any YouTube video. https://vidreduce.vercel.app/" target="_blank">
+                        💬 WhatsApp
+                    </a>
+                    <a class="social-btn reddit" href="https://reddit.com/submit?url=https://vidreduce.vercel.app/&title=VidReduce - AI-Powered YouTube Video Summarizer" target="_blank">
+                        🟠 Reddit
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -799,11 +902,44 @@
                     btn.innerHTML = '✅ Copied!';
                     btn.style.background = '#28a745';
                     setTimeout(() => {
-                        btn.innerHTML = '� Copy Address';
+                        btn.innerHTML = '📋 Copy Address';
                         btn.style.background = '#007bff';
                     }, 2000);
                 });
             });
+        }
+
+        // Social sharing functionality
+        async function copySiteLink() {
+            const button = document.querySelector('.social-btn.copy');
+            const originalText = button.innerHTML;
+            
+            try {
+                await navigator.clipboard.writeText('https://vidreduce.vercel.app/');
+                button.innerHTML = '✅ Copied!';
+                button.classList.add('success');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('success');
+                }, 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = 'https://vidreduce.vercel.app/';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                button.innerHTML = '✅ Copied!';
+                button.classList.add('success');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('success');
+                }, 2000);
+            }
         }
     </script>
 </body>
