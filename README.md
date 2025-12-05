@@ -66,7 +66,7 @@ Before you begin, ensure you have:
 ### Basic Usage
 
 ```bash
-node fetchVideoTranscript.js VIDEO_ID
+node youtubeSummarize.js VIDEO_ID
 ```
 
 Replace `VIDEO_ID` with the YouTube video ID (the part after `v=` in the URL).
@@ -76,7 +76,7 @@ Replace `VIDEO_ID` with the YouTube video ID (the part after `v=` in the URL).
 For a video with URL: `https://www.youtube.com/watch?v=3hptKYix4X8`
 
 ```bash
-node fetchVideoTranscript.js 3hptKYix4X8
+node youtubeSummarize.js 3hptKYix4X8
 ```
 
 ### What Happens
@@ -128,7 +128,7 @@ Summary saved to summary_3hptKYix4X8.txt
 
 ```
 YTSummarize/
-├── fetchVideoTranscript.js   # Main application script
+├── youtubeSummarize.js       # Main application script
 ├── package.json               # Node.js dependencies and metadata
 ├── .env                       # Environment variables (API keys)
 ├── .gitignore                 # Files to ignore in git
@@ -201,7 +201,7 @@ Saves both raw transcript and formatted summary to disk and displays the summary
 
 ## Configuration
 
-You can customize the summarization by editing `fetchVideoTranscript.js`:
+You can customize the summarization by editing `youtubeSummarize.js`:
 
 ### Change AI Model
 ```javascript
