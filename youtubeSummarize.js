@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const axios = require('axios');
-const { Innertube } = require('youtubei.js');
+// const { Innertube } = require('youtubei.js'); // Remove this - will use dynamic import
 const OpenAI = require('openai');
 const { exec } = require('child_process');
 
@@ -54,21 +54,24 @@ async function getVideoDetails(videoId, apiKey) {
 async function fetchTranscript(videoId) {
   console.log(`Attempting to fetch transcript for video ID: ${videoId}`);
   try {
+    // Dynamic import for ES module
+    const { Innertube } = await import('youtubei.js');
+
     const youtube = await Innertube.create();
     const info = await youtube.getInfo(videoId);
-    
+
     const transcriptData = await info.getTranscript();
-    
+
     if (transcriptData && transcriptData.transcript) {
       const segments = transcriptData.transcript.content.body.initial_segments;
-      
+
       if (segments && segments.length > 0) {
         const transcriptText = segments.map(seg => seg.snippet.text).join(' ');
         console.log(`✓ Transcript fetched with ${segments.length} segments`);
         return transcriptText;
       }
     }
-    
+
     console.log('No transcript segments found.');
     return null;
   } catch (error) {

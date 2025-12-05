@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const fs = require('fs');
 const axios = require('axios');
-const { Innertube } = require('youtubei.js');
+// const { Innertube } = require('youtubei.js'); // Remove this - will use dynamic import
 const OpenAI = require('openai');
 const { exec } = require('child_process');
 const path = require('path');
@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Initialize OpenAI (will be set dynamically from user input)
 let openai = null;
@@ -41,6 +41,9 @@ async function getVideoDetails(videoId, apiKey) {
 async function fetchTranscript(videoId) {
   console.log(`Attempting to fetch transcript for video ID: ${videoId}`);
   try {
+    // Dynamic import for ES module
+    const { Innertube } = await import('youtubei.js');
+
     const youtube = await Innertube.create();
     const info = await youtube.getInfo(videoId);
 
@@ -62,9 +65,7 @@ async function fetchTranscript(videoId) {
     console.error(`Failed to fetch transcript: ${error.message}`);
     return null;
   }
-}
-
-/**
+}/**
  * Summarize the transcript using OpenAI
  */
 async function summarizeTranscript(transcript, videoTitle) {
@@ -292,7 +293,13 @@ app.post('/summarize', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 YT Summarize Web UI running at http://localhost:${PORT}`);
-  console.log(`📱 Open your browser and visit the URL above to start summarizing YouTube videos!`);
-});
+// Export for Vercel serverless functions
+module.exports = app;
+
+// Only start server if not in Vercel environment
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 YT Summarize Web UI running at http://localhost:${PORT}`);
+    console.log(`📱 Open your browser and visit the URL above to start summarizing YouTube videos!`);
+  });
+}

@@ -243,13 +243,58 @@ max_tokens: 1000,  // Increase for longer summaries
 temperature: 0.7,  // Lower (0.3) = more focused, Higher (0.9) = more creative
 ```
 
-## Cost Estimate
+## 🚀 Deployment to Vercel
 
-Using GPT-4o-mini:
-- **Input**: ~$0.15 per 1 million tokens
-- **Output**: ~$0.60 per 1 million tokens
-- **Average video transcript**: ~2,000-5,000 tokens
-- **Cost per summary**: ~$0.001-$0.003 (less than half a cent)
+### Prerequisites
+1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
+2. **Vercel CLI**: Install globally
+   ```bash
+   npm install -g vercel
+   ```
+
+### Step-by-Step Deployment
+
+1. **Login to Vercel**
+   ```bash
+   vercel login
+   ```
+
+2. **Deploy to Vercel**
+   ```bash
+   vercel
+   ```
+   - Choose your account when prompted
+   - Confirm the project settings
+   - Vercel will detect your Node.js app automatically
+
+3. **Set Environment Variables**
+   In your Vercel dashboard or via CLI:
+   ```bash
+   vercel env add YOUTUBE_API_KEY
+   vercel env add OPENAI_API_KEY
+   ```
+   Or set them in the Vercel dashboard under Project Settings → Environment Variables
+
+4. **Redeploy** (if you set env vars after initial deployment)
+   ```bash
+   vercel --prod
+   ```
+
+### Your App will be Live! 🎉
+
+Vercel will provide you with a URL like: `https://your-project.vercel.app`
+
+### Troubleshooting
+
+- **Build Errors**: Check that all dependencies are in `package.json`
+- **Environment Variables**: Make sure they're set in Vercel dashboard
+- **Cold Starts**: First request may be slow (normal for serverless)
+- **File Paths**: Vercel uses Linux paths, ensure you're using `path.join()`
+
+### Cost
+- **Free Tier**: 100GB bandwidth, 100GB hours
+- **Hobby Plan**: $0/month (if eligible) or $7/month
+- **Pro Plan**: $20/month for higher limits
 
 ## Privacy & Security
 
