@@ -368,7 +368,7 @@
         </div>
 
         <form id="summarizeForm">
-            <div class="ai-provider-section">
+            <div class="ai-provider-section" id="aiProviderSection">
                 <label>🤖 Choose AI Provider</label>
                 <div class="ai-provider-options">
                     <div class="ai-option" data-provider="openai">
@@ -392,7 +392,7 @@
                 </div>
             </div>
 
-            <div class="api-keys-section">
+            <div class="api-keys-section" id="apiKeysSection">
                 <h3>🔑 API Configuration</h3>
                 <div class="form-group">
                     <label for="youtubeKey">YouTube Data API Key</label>
@@ -588,6 +588,37 @@
                 e.target.value = url.pathname.substring(1);
             }
         });
+
+        // Check environment configuration on page load
+        async function checkEnvironmentConfig() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+
+                if (config.hasEnvKeys) {
+                    // Hide API key sections if environment variables are configured
+                    document.getElementById('apiKeysSection').style.display = 'none';
+                    document.getElementById('aiProviderSection').style.display = 'none';
+
+                    // Update form to not require API keys
+                    document.getElementById('youtubeKey').required = false;
+                    document.getElementById('openaiKey').required = false;
+                    document.getElementById('geminiKey').required = false;
+
+                    // Auto-select AI provider based on available keys
+                    if (config.hasOpenAIKey) {
+                        document.getElementById('openai').checked = true;
+                    } else if (config.hasGeminiKey) {
+                        document.getElementById('gemini').checked = true;
+                    }
+                }
+            } catch (error) {
+                console.log('Environment config check failed, showing all fields');
+            }
+        }
+
+        // Check configuration when page loads
+        document.addEventListener('DOMContentLoaded', checkEnvironmentConfig);
     </script>
 </body>
 </html>

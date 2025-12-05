@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Initialize OpenAI (will be set dynamically from user input)
+// Initialize OpenAI (will be set dynamically per request)
 let openai = null;
 
 /**
@@ -134,12 +134,12 @@ async function summarizeWithGemini(transcript, videoTitle, apiKey) {
     const availableModels = modelsData.models?.map(m => m.name.replace('models/', '')) || [];
     console.log('Parsed available models:', availableModels.slice(0, 10).join(', ') + '...'); // Show first 10
 
-    const textGenerationModels = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash-001', 'gemini-2.0-flash', 'gemini-pro-latest', 'gemini-flash-latest', 'gemini-2.0-pro-exp'];
-    console.log('Looking for preferred models:', textGenerationModels);
+    // Only use gemini-2.5-flash - no fallbacks
+    const modelToUse = 'gemini-2.5-flash';
 
-    const modelToUse = textGenerationModels.find(m => availableModels.includes(m)) ||
-                      availableModels.find(m => m.includes('gemini') && !m.includes('embedding')) ||
-                      availableModels[0];
+    if (!availableModels.includes(modelToUse)) {
+      throw new Error(`Required model 'gemini-2.5-flash' is not available. Please check your Gemini API access.`);
+    }
 
     console.log('Selected model:', modelToUse);
 
@@ -149,7 +149,7 @@ async function summarizeWithGemini(transcript, videoTitle, apiKey) {
 
     console.log(`Using Gemini model: ${modelToUse}`);
 
-    const prompt = `Please summarize the following YouTube video transcript and provide ONLY the main takeaways in bullet point format.
+    const prompt = `Please do a thorough bullet point summary with the most prescient insights from the following YouTube video transcript and provide ONLY the main takeaways in bullet point format.
 
 Video Title: ${videoTitle}
 
@@ -365,22 +365,46 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Check if environment variables are configured
+app.get('/api/config', (req, res) => {
+  const hasYouTubeKey = !!process.env.YOUTUBE_API_KEY;
+  const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+  const hasGeminiKey = !!process.env.GEMINI_API_KEY;
+
+  res.json({
+    hasEnvKeys: hasYouTubeKey && (hasOpenAIKey || hasGeminiKey),
+    hasYouTubeKey,
+    hasOpenAIKey,
+    hasGeminiKey
+  });
+});
+
 app.post('/summarize', async (req, res) => {
   const { youtubeKey, aiProvider, openaiKey, geminiKey, videoId } = req.body;
 
-  if (!youtubeKey || !videoId) {
+  // Check if environment variables are available
+  const hasEnvYouTubeKey = process.env.YOUTUBE_API_KEY;
+  const hasEnvOpenAIKey = process.env.OPENAI_API_KEY;
+  const hasEnvGeminiKey = process.env.GEMINI_API_KEY;
+
+  // Use environment variables if available, otherwise use form data
+  const finalYouTubeKey = hasEnvYouTubeKey || youtubeKey;
+  const finalOpenAIKey = hasEnvOpenAIKey || openaiKey;
+  const finalGeminiKey = hasEnvGeminiKey || geminiKey;
+
+  if (!finalYouTubeKey || !videoId) {
     return res.status(400).json({
       error: 'Missing required fields: YouTube API key and video ID are required.'
     });
   }
 
-  if (aiProvider === 'openai' && !openaiKey) {
+  if (aiProvider === 'openai' && !finalOpenAIKey) {
     return res.status(400).json({
       error: 'OpenAI API key is required when using OpenAI.'
     });
   }
 
-  if (aiProvider === 'gemini' && !geminiKey) {
+  if (aiProvider === 'gemini' && !finalGeminiKey) {
     return res.status(400).json({
       error: 'Google Gemini API key is required when using Gemini.'
     });
@@ -393,11 +417,8 @@ app.post('/summarize', async (req, res) => {
   }
 
   try {
-    // Initialize OpenAI with user's key
-    openai = new OpenAI({ apiKey: openaiKey });
-
     // First verify the video exists
-    const videoDetails = await getVideoDetails(videoId, youtubeKey);
+    const videoDetails = await getVideoDetails(videoId, finalYouTubeKey);
     if (!videoDetails) {
       return res.status(404).json({
         error: 'Video not found or inaccessible. Please check the video ID.'
@@ -418,7 +439,7 @@ app.post('/summarize', async (req, res) => {
     console.log(`Transcript fetched successfully (${transcript.length} characters)`);
 
     // Generate summary
-    const apiKey = aiProvider === 'openai' ? openaiKey : geminiKey;
+    const apiKey = aiProvider === 'openai' ? finalOpenAIKey : finalGeminiKey;
     const summary = await summarizeTranscript(transcript, videoTitle, aiProvider, apiKey);
     if (!summary) {
       return res.status(500).json({
