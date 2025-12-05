@@ -11,6 +11,7 @@ npm-debug.log*
 # Transcript files
 transcript_*.txt
 summary_*.txt
+summary_*.html
 all_transcripts.txt
 
 # OS files

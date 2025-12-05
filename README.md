@@ -6,7 +6,8 @@ A Node.js command-line tool that fetches YouTube video transcripts and generates
 
 - 🎥 **Fetch YouTube Transcripts** - Automatically retrieves closed captions/transcripts from any YouTube video
 - 🤖 **AI-Powered Summaries** - Uses OpenAI's GPT-4o-mini to generate concise summaries with main takeaways
-- 💾 **Saves Output** - Stores both full transcripts and summaries as text files
+- 🌐 **Beautiful HTML Output** - Generates professional HTML summaries that automatically open in your browser
+- 💾 **Saves Output** - Stores both full transcripts and formatted HTML summaries as files
 - ✅ **Video Validation** - Verifies video exists before processing using YouTube Data API
 - 🔒 **Secure** - Uses environment variables for API keys (never hardcoded)
 
@@ -95,7 +96,7 @@ node youtubeSummarize.js 3hptKYix4X8
 The tool generates two files per video:
 
 - **`transcript_VIDEO_ID.txt`** - Full transcript of the video
-- **`summary_VIDEO_ID.txt`** - AI-generated summary with video title and main takeaways
+- **`summary_VIDEO_ID.html`** - AI-generated summary in a beautifully formatted HTML page (automatically opens in browser)
 
 Both files are automatically ignored by git (see `.gitignore`).
 
@@ -112,9 +113,10 @@ Transcript length: 15847 characters.
 Sending transcript to OpenAI for summarization...
 ✓ Summary generated successfully
 
-Summary saved to summary_3hptKYix4X8.txt
+Summary saved to summary_3hptKYix4X8.html
+✓ Summary opened in browser: summary_3hptKYix4X8.html
 
---- SUMMARY ---
+--- SUMMARY PREVIEW ---
 **Main Takeaways:**
 
 1. **Understanding REST APIs**: REST APIs are essential for...
