@@ -242,18 +242,57 @@ async function fetchTranscript(videoId) {
   console.log(`Attempting to fetch transcript for video ID: ${videoId}`);
   try {
     // Dynamic import for ES module
-    const { Innertube } = await import('youtubei.js');
+    const { Innertube, UniversalCache } = await import('youtubei.js');
 
-    const youtube = await Innertube.create();
+    // Create Innertube instance with cache to help with API stability
+    const youtube = await Innertube.create({
+      cache: new UniversalCache(false), // Disable caching for fresh requests
+      generate_session_locally: true,   // Generate session locally to avoid some API issues
+    });
+
     const info = await youtube.getInfo(videoId);
 
-    const transcriptData = await info.getTranscript();
+    // Try to get transcript
+    let transcriptData;
+    try {
+      transcriptData = await info.getTranscript();
+    } catch (transcriptError) {
+      console.log(`Direct transcript fetch failed: ${transcriptError.message}`);
+      
+      // Fallback: try to get captions from the video info
+      if (info.captions && info.captions.caption_tracks && info.captions.caption_tracks.length > 0) {
+        console.log('Attempting fallback via caption tracks...');
+        const captionTrack = info.captions.caption_tracks.find(track => track.language_code === 'en') 
+                          || info.captions.caption_tracks[0];
+        
+        if (captionTrack && captionTrack.base_url) {
+          const captionResponse = await axios.get(captionTrack.base_url);
+          // Parse XML captions
+          const captionText = captionResponse.data
+            .replace(/<[^>]*>/g, ' ')  // Remove XML tags
+            .replace(/&#39;/g, "'")
+            .replace(/&quot;/g, '"')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/\s+/g, ' ')
+            .trim();
+          
+          if (captionText) {
+            console.log(`✓ Transcript fetched via caption track fallback`);
+            return captionText;
+          }
+        }
+      }
+      
+      throw transcriptError;
+    }
 
     if (transcriptData && transcriptData.transcript) {
-      const segments = transcriptData.transcript.content.body.initial_segments;
+      const segments = transcriptData.transcript.content?.body?.initial_segments;
 
       if (segments && segments.length > 0) {
-        const transcriptText = segments.map(seg => seg.snippet.text).join(' ');
+        const transcriptText = segments.map(seg => seg.snippet?.text || '').filter(Boolean).join(' ');
         console.log(`✓ Transcript fetched with ${segments.length} segments`);
         return transcriptText;
       }
@@ -884,8 +923,29 @@ app.post('/summarize', async (req, res) => {
 
   } catch (error) {
     console.error('Error processing request:', error);
+    
+    // Extract meaningful error message for the user
+    let userMessage = 'An unexpected error occurred. Please try again.';
+    
+    if (error.message) {
+      // Check for known error patterns and provide friendly messages
+      if (error.message.includes('overloaded') || error.message.includes('503')) {
+        userMessage = 'The AI model is currently overloaded. Please try again in a few moments.';
+      } else if (error.message.includes('quota') || error.message.includes('429')) {
+        userMessage = 'API rate limit reached. Please wait a moment and try again.';
+      } else if (error.message.includes('Invalid API key') || error.message.includes('401')) {
+        userMessage = 'Invalid API key. Please check your API key and try again.';
+      } else if (error.message.includes('Gemini API error') || error.message.includes('OpenAI')) {
+        // Pass through API-specific errors
+        userMessage = error.message;
+      } else {
+        // For other errors, include the actual message
+        userMessage = error.message;
+      }
+    }
+    
     res.status(500).json({
-      error: 'An unexpected error occurred. Please try again.'
+      error: userMessage
     });
   }
 });
