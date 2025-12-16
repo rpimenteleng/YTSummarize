@@ -41,6 +41,55 @@
             }
         }
     </script>
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+                {
+                    "@type": "Question",
+                    "name": "How does VidReduce summarize YouTube videos?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "VidReduce pulls the video metadata and transcript (captions) when available, then uses AI to create a structured summary with key takeaways and a conclusion."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Can I summarize a long YouTube video?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. Longer videos may take more time to process, and summary quality depends on transcript availability and accuracy."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Does VidReduce support Twitter/X videos?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "Yes. For supported public Twitter/X video posts, VidReduce analyzes the video with AI and produces a summary report."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Which AI models does VidReduce use?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "VidReduce supports OpenAI and Google Gemini options. Availability depends on your API keys and the video source."
+                    }
+                },
+                {
+                    "@type": "Question",
+                    "name": "Do I need API keys to use VidReduce?",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "The deployed VidReduce site offers free access to LLM models. The open-source version lets you supply your own API keys if none are configured on the backend."
+                    }
+                }
+            ]
+        }
+    </script>
     
     <style>
         :root {
@@ -663,6 +712,124 @@
         .social-btn.success:hover {
             background: #218838 !important;
         }
+
+        /* SEO content sections */
+        .seo-sections {
+            margin-top: 26px;
+        }
+
+        .seo-card {
+            background: rgba(255, 255, 255, 0.62);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 26px rgba(2, 6, 23, 0.10);
+            padding: 22px;
+            margin-top: 16px;
+        }
+
+        .seo-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.25rem;
+            letter-spacing: -0.01em;
+            color: var(--text);
+        }
+
+        .seo-card p {
+            margin: 10px 0;
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 0.96rem;
+        }
+
+        .how-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .how-step {
+            background: rgba(255, 255, 255, 0.70);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 14px;
+        }
+
+        .how-step strong {
+            color: var(--text);
+        }
+
+        .how-step .k {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .how-step .k .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent-2), var(--accent), var(--accent-3));
+            box-shadow: 0 10px 18px rgba(2, 6, 23, 0.10);
+        }
+
+        .faq details {
+            background: rgba(255, 255, 255, 0.70);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            margin-top: 10px;
+        }
+
+        .faq summary {
+            cursor: pointer;
+            list-style: none;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .faq summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .faq summary::after {
+            content: '+';
+            font-weight: 900;
+            color: rgba(15, 23, 42, 0.7);
+            width: 28px;
+            height: 28px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border);
+            box-shadow: 0 6px 14px rgba(2, 6, 23, 0.08);
+            transition: transform 0.2s ease;
+            flex: 0 0 auto;
+        }
+
+        .faq details[open] summary::after {
+            content: '−';
+            transform: rotate(180deg);
+        }
+
+        .faq details p {
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 768px) {
+            .how-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -772,6 +939,54 @@
             <div style="margin-top: 15px; text-align: center;">
                 <button class="donate-btn" id="donateBtn" onclick="initiateDonation()">💰 Donate USDC</button>
             </div>
+        </div>
+
+        <div class="seo-sections" id="how-it-works">
+            <section class="seo-card" aria-label="How VidReduce works">
+                <h2>How VidReduce Works (AI Video Summarizer)</h2>
+                <p>
+                    VidReduce helps you summarize YouTube videos (via transcript/captions) and analyze supported Twitter/X video posts using AI.
+                    Paste a video URL (or YouTube video ID), choose an AI provider, and get a clean, structured summary with key takeaways.
+                </p>
+                <div class="how-grid">
+                    <div class="how-step">
+                        <div class="k"><span class="dot" aria-hidden="true"></span>1) Provide a video</div>
+                        <p>Enter a <strong>YouTube URL/ID</strong> or a <strong>Twitter/X video URL</strong>. VidReduce detects the source automatically.</p>
+                    </div>
+                    <div class="how-step">
+                        <div class="k"><span class="dot" aria-hidden="true"></span>2) Get the content</div>
+                        <p>For YouTube, VidReduce fetches the transcript when available. For Twitter/X, it analyzes the video content directly with AI.</p>
+                    </div>
+                    <div class="how-step">
+                        <div class="k"><span class="dot" aria-hidden="true"></span>3) Summarize with AI</div>
+                        <p>Choose <strong>OpenAI</strong> or <strong>Google Gemini</strong> to generate an organized summary, highlights, and a conclusion.</p>
+                    </div>
+                    <div class="how-step">
+                        <div class="k"><span class="dot" aria-hidden="true"></span>4) Export results</div>
+                        <p>View the full HTML summary report, download it, and grab the raw transcript (when applicable) for notes or research.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="seo-card faq" id="faq" aria-label="Frequently asked questions">
+                <h2>FAQ</h2>
+                <details>
+                    <summary>How do I summarize a long YouTube video quickly?</summary>
+                    <p>Paste the YouTube URL (or video ID). If a transcript is available, VidReduce can summarize long videos efficiently and return key points plus a conclusion.</p>
+                </details>
+                <details>
+                    <summary>Why does summary quality vary between videos?</summary>
+                    <p>For YouTube, results depend heavily on caption/transcript quality. For Twitter/X, results depend on the video clarity and what the AI can perceive (speech, on-screen text, actions).</p>
+                </details>
+                <details>
+                    <summary>Do you support Twitter/X video summarization?</summary>
+                    <p>Yes—VidReduce can analyze supported public Twitter/X video posts and generate a structured AI report. Private/protected tweets won’t work.</p>
+                </details>
+                <details>
+                    <summary>Do I need API keys to use VidReduce?</summary>
+                    <p>The deployed VidReduce site offers free access to LLM models. The open-source version lets you supply your own API keys if none are configured on the backend.</p>
+                </details>
+            </section>
         </div>
 
         <!-- Social Sharing Section -->

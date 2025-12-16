@@ -14,6 +14,9 @@ summary_*.txt
 summary_*.html
 all_transcripts.txt
 
+# Google Search Console verification (must be committed)
+!public/google*.html
+
 # OS files
 .DS_Store
 Thumbs.db
